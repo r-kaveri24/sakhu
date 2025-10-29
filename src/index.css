@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "lato", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --color-brand: #7c3aed; /* purple-600 */
+  --color-purple-600: #804499;
+  --color-purple-700: #56027A;
+  --color-yellow: #FFFF00;
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+    width: 100%;
+  }
+  body {
+    @apply font-sans text-gray-800 bg-white antialiased flex items-center justify-center overflow-x-hidden;
+  }
+  a { @apply text-white hover:text-yellow; }
+ .purple {
+    color: var(--color-purple-600);
+  }
+  .width-1280 {
+    max-width: 1280px;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbars for scrollable containers */
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none; /* Chrome, Safari */
+  }
+}
