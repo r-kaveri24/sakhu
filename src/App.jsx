@@ -1,8 +1,18 @@
+import { useEffect, useState } from 'react'
 import Header from './components/Header.jsx'
 import Footer from './components/Footer.jsx'
 import Home from './pages/Home.jsx'
+import About from './pages/About.jsx'
 
 export default function App() {
+  const [route, setRoute] = useState(window.location.hash || '#home')
+
+  useEffect(() => {
+    const onHash = () => setRoute(window.location.hash || '#home')
+    window.addEventListener('hashchange', onHash)
+    return () => window.removeEventListener('hashchange', onHash)
+  }, [])
+
   return (
     <div
       className="min-h-screen font-sans"
@@ -11,7 +21,7 @@ export default function App() {
       }}
     >
       <Header />
-      <Home />
+      {route === '#about' ? <About /> : <Home />}
       <Footer />
     </div>
   )

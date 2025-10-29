@@ -27,6 +27,7 @@ import sakhu from '../assets/about-sakhu.png'
 
 import { useEffect, useState, useRef, useMemo } from 'react';
 import testimonialBg from '../assets/testimonial-bg.jpg';
+import Testimonials from '../components/Testimonials.jsx';
 
 export default function Home() {
   const slides = [null, null, null];
@@ -619,119 +620,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials - dynamic, horizontal scroll with controls */}
-      <section id="testimonials">
-        {/* Heading OUTSIDE the bg image */}
-            <div className="max-w-7xl mx-auto px-4">
-              <h2 className="text-2xl md:text-3xl font-bold text-center text-black mb-2">Testimonials</h2>
-              <p className="text-center text-xs md:text-sm text-black">{testimonials.subtitle}</p>
-            </div>
-
-        {/* Image-backed area that only wraps cards + controls */}
-          <div className="relative mt-2 h-[600px] flex items-center justify-center">
-            {/* Background image */}
-            <div className="absolute inset-0 -z-10">
-              <img
-                src={testimonialBg}
-                alt="Testimonials background"
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-black/20" />
-            </div>
-
-            {/* Content over the image */}
-            <div className="relative max-w-7xl mx-auto px-4 py-8">
-            {/* Horizontal scroll row */}
-            <div>
-              <div
-                ref={listRef}
-                onWheel={blockWheel}
-                onScroll={handleInfiniteScroll}
-                onTouchStart={blockTouch}
-                onTouchMove={blockTouch}
-                onPointerDown={blockPointer}
-                onPointerMove={blockPointer}
-                className="overflow-x-hidden scroll-smooth no-scrollbar w-[280px] sm:w-[300px] md:w-full mx-auto"
-                style={{ touchAction: 'none', userSelect: 'none' }}
-              >
-                <div className="flex gap-6 md:gap-20 py-2">
-                  {loopedItems.map((t, i) => (
-                    <div
-                      key={i}
-                      data-testimonial-card
-                      className="w-[260px] sm:w-[300px] md:w-[340px] h-[308px] shrink-0 rounded-lg bg-white shadow p-6 flex items-start"
-                    >
-                      <div className="flex-1 space-y-2">
-                        <div className="w-[78px] h-[78px] rounded-full bg-gray-200 overflow-hidden shrink-0">
-                          {t.avatar ? (
-                            <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
-                          ) : null}
-                        </div>
-                        <h3 className="text-sm md:text-base font-semibold text-black">{t.name}</h3>
-                        <p className="text-xs text-gray-500">{t.relation}</p>
-                        <p className="mt-2 text-sm text-gray-700 h-20 overflow-hidden text-ellipsis line-clamp-4">
-                          {t.quote}
-                        </p>
-                        <div className="mt-2 flex items-center gap-1">
-                          {Array.from({ length: 5 }).map((_, s) => {
-                            const rating = t.rating || 0;
-                            const full = Math.floor(rating);
-                            const hasHalf = (rating - full) >= 0.5;
-                            const isFull = s < full;
-                            const isHalf = s === full && hasHalf;
-                            return (
-                              <span key={s} className="relative inline-block w-4 h-4">
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 20 20"
-                                  fill={isFull ? '#f59e0b' : '#e5e7eb'}
-                                  className="w-4 h-4"
-                                >
-                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.803 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.803-2.036a1 1 0 00-1.176 0l-2.803 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.88 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                </svg>
-                                {isHalf ? (
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20"
-                                    fill="#f59e0b"
-                                    className="w-4 h-4 absolute top-0 left-0"
-                                    style={{ clipPath: 'inset(0 50% 0 0)' }}
-                                  >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.803 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.803-2.036a1 1 0 00-1.176 0l-2.803 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.88 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                ) : null}
-                              </span>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Controls */}
-              <div className="mt-6 flex justify-center gap-3">
-                <button
-                  onClick={scrollLeft}
-                  aria-label="Scroll left"
-                  className="bg-[#2E3192] text-white w-8 h-8 rounded hover:bg-black flex items-center justify-center"
-                >
-                  ←
-                </button>
-                <button
-                  onClick={scrollRight}
-                  aria-label="Scroll right"
-                  className="bg-[#2E3192] text-white w-8 h-8 rounded hover:bg-black flex items-center justify-center"
-                >
-                  →
-                </button>
-              </div>
-            </div>
-          </div>
-
-          </div>
-        </section>
+      <Testimonials subtitle={testimonials.subtitle} items={testimonials.items} />
 
     </main>
-  )
-}
+  )}
