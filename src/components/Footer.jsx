@@ -5,6 +5,7 @@ import instagramIcon from "../assets/social-instagram.png";
 import twitterIcon from "../assets/social-twitter.png";
 import facebookIcon from "../assets/social-facebook.png";
 import whatsapp from "../assets/social-whatsapp.png";
+import { Link } from 'react-router-dom';
 
 
 
@@ -74,7 +75,7 @@ export default function Footer() {
               <a aria-label="Facebook" href="#" className="w-7 h-7 inline-flex items-center justify-center ">
                 <img src={facebookIcon} alt="" />
               </a>
-              <a aria-label="YouTube" href="#" className="w-7 h-7 inline-flex items-center justify-center ">
+              <a aria-label="YouTube" href="https://youtube.com/@sakhucancerfoundation?si=GQeFbtJT8aS8-0Gw" className="w-7 h-7 inline-flex items-center justify-center ">
                 <img src={youtubeIcon} alt="" />
               </a>
               
@@ -84,12 +85,13 @@ export default function Footer() {
           {/* Middle: Links */}
           <div>
             <ul className="mt-3 space-y-2 text-sm text-gray-300">
-              <li><a href="#home" className="hover:text-white">Home</a></li>
-              <li><a href="#about" className="hover:text-white">About Us</a></li>
-              <li><a href="#news" className="hover:text-white">News & Events</a></li>
-              <li><a href="#volunteer" className="hover:text-white">Volunteer</a></li>
-              <li><a href="#resources" className="hover:text-white">Resources</a></li>
-              <li><a href="#contact" className="hover:text-white">Contact</a></li>
+              <li><Link to="/" className="hover:text-white">Home</Link></li>
+              <li><Link to="/about" className="hover:text-white">About Us</Link></li>
+              <li><a href="/news" className="hover:text-white">News & Events</a></li>
+              <li><a href="/volunteer" className="hover:text-white">Volunteer</a></li>
+              <li><a href="/resources" className="hover:text-white">Resources</a></li>
+              <li><span aria-disabled="true" title="Coming Soon" className="text-gray-500 cursor-not-allowed">Blog</span></li>
+              <li><a href="/contact" className="hover:text-white">Contact</a></li>
             </ul>
           </div>
 
