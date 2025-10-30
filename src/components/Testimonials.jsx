@@ -187,7 +187,7 @@ export default function Testimonials({ subtitle = "Family Members Of Patient's",
         {/* Heading OUTSIDE the bg image */}
             <div className="max-w-7xl mx-auto px-4">
               <h2 className="text-2xl md:text-3xl font-bold text-center text-black mb-2">Testimonials</h2>
-              <p className="text-center text-xs md:text-sm text-black">{testimonials.subtitle}</p>
+              <p className="text-center text-xs md:text-sm text-black">{subtitle}</p>
             </div>
 
         {/* Image-backed area that only wraps cards + controls */}

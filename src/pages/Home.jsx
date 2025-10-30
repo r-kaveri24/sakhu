@@ -24,6 +24,7 @@ import eligibility2 from '../assets/eligibility2.png';
 import news1 from '../assets/home-latest1.png';
 import news2 from '../assets/home-latest2.png';
 import sakhu from '../assets/about-sakhu.png'
+import logo from '../assets/logoNaav.png'
 
 import { useEffect, useState, useRef, useMemo } from 'react';
 import testimonialBg from '../assets/testimonial-bg.jpg';
@@ -44,6 +45,35 @@ export default function Home() {
     }
   });
   const listRef = useRef(null);
+
+  // Stories In Motion (YouTube) data + helpers
+  const storyLinks = [
+    'https://youtu.be/BQWVOShOsis?si=HkqSeXF72D9uSU5m',
+    'https://youtu.be/AexAwM_TI9M?si=btJDesrlWrHO0Ope',
+  ];
+  const extractYouTubeId = (url) => {
+    try {
+      const u = new URL(url);
+      if (u.hostname === 'youtu.be') return u.pathname.replace('/', '');
+      if (u.hostname.includes('youtube.com')) {
+        const v = u.searchParams.get('v');
+        if (v) return v;
+        const parts = u.pathname.split('/');
+        const idx = parts.findIndex((p) => ['embed', 'shorts', 'v'].includes(p));
+        if (idx >= 0 && parts[idx + 1]) return parts[idx + 1];
+      }
+      const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|shorts\/)([\w-]{11})/);
+      return m ? m[1] : null;
+    } catch {
+      const m = url.match(/(?:youtu\.be\/|v=|\/embed\/|shorts\/)([\w-]{11})/);
+      return m ? m[1] : null;
+    }
+  };
+  const storyIds = storyLinks.map(extractYouTubeId).filter(Boolean);
+  const [storyIndex, setStoryIndex] = useState(0);
+  const [openStoryId, setOpenStoryId] = useState(null);
+  const prevStory = () => setStoryIndex((i) => (i - 1 + storyIds.length) % storyIds.length);
+  const nextStory = () => setStoryIndex((i) => (i + 1) % storyIds.length);
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -147,15 +177,7 @@ export default function Home() {
   const loopedItems = useMemo(() => [...items, ...items, ...items], [items]);
   const segmentRef = useRef(0);
 
-  const onTestimonialsWheel = (e) => {
-    const el = listRef.current;
-    if (!el) return;
-    // Translate vertical wheel into horizontal scroll when vertical is dominant
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-      e.preventDefault();
-      el.scrollBy({ left: e.deltaY, behavior: 'smooth' });
-    }
-  };
+
 
   // Block wheel scrolling to enforce button-only manual scroll inside testimonials
   const blockWheel = (e) => {
@@ -311,6 +333,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      
 
       {/* Introduction */}
       <section id="intro" className="py-10 sm:py-12 flex items-center justify-center">
@@ -619,8 +643,204 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Stories In Motion */}
+      <section id="stories" className="py-12 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-center text-2xl md:text-3xl">
+            <span className="font-thin">Stories In</span> <span className="font-bold">Motion</span>
+          </h2>
+          {/* Centered single-card carousel with side arrows */}
+          <div className="relative mt-6 flex items-center justify-center">
+            {/* Left arrow */}
+            <button
+              onClick={prevStory}
+              aria-label="Previous video"
+              className="absolute left-2 sm:left-6 z-10 bg-[#2E3192] text-white w-8 h-8 rounded hover:bg-black flex items-center justify-center"
+            >
+              ←
+            </button>
+
+            {/* Current video card */}
+            <button
+              onClick={() => setOpenStoryId(storyIds[storyIndex])}
+              className="group relative rounded-lg overflow-hidden border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-purple-600"
+            >
+              <img
+                src={`https://img.youtube.com/vi/${storyIds[storyIndex]}/hqdefault.jpg`}
+                alt="Story video"
+                className="w-[90vw] max-w-[740px] h-[220px] sm:h-[360px] md:h-[420px] object-cover"
+              />
+              {/* Persistent black overlay */}
+              <div className="absolute inset-0 bg-black/40 z-0" />
+              {/* Brand overlay with logo + name */}
+              <div className="absolute top-2 left-2 z-10 flex items-center gap-2 bg-black/60 text-white px-2 py-1 rounded-md">
+                <img src={logo} alt="Sakhu Logo" className="w-6 h-6 rounded-full ring-1 ring-white/40" />
+                <span className="text-xs font-semibold">SAKHU Cancer Foundation</span>
+              </div>
+              {/* Center play button */}
+              <div className="absolute inset-0 z-10 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-white/90 shadow flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-purple-700">
+                    <path d="M8 5v14l11-7-11-7z" />
+                  </svg>
+                </div>
+              </div>
+            </button>
+
+            {/* Right arrow */}
+            <button
+              onClick={nextStory}
+              aria-label="Next video"
+              className="absolute right-2 sm:right-6 z-10 bg-[#2E3192] text-white w-8 h-8 rounded hover:bg-black flex items-center justify-center"
+            >
+              →
+            </button>
+          </div>
+        </div>
+      </section>
+
       {/* Testimonials - dynamic, horizontal scroll with controls */}
-      <Testimonials subtitle={testimonials.subtitle} items={testimonials.items} />
+        <section id="testimonials">
+        {/* Heading OUTSIDE the bg image */}
+            <div className="max-w-7xl mx-auto px-4">
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-black mb-2">Testimonials</h2>
+              <p className="text-center text-xs md:text-sm text-black">{testimonials.subtitle}</p>
+            </div>
+
+        {/* Image-backed area that only wraps cards + controls */}
+          <div className="relative mt-2 h-[600px] flex items-center justify-center">
+            {/* Background image */}
+            <div className="absolute inset-0 -z-10">
+              <img
+                src={testimonialBg}
+                alt="Testimonials background"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/20" />
+            </div>
+
+            {/* Content over the image */}
+            <div className="relative max-w-7xl mx-auto px-4 py-8">
+            {/* Horizontal scroll row */}
+            <div>
+              <div
+                ref={listRef}
+                onWheel={blockWheel}
+                onScroll={handleInfiniteScroll}
+                onTouchStart={blockTouch}
+                onTouchMove={blockTouch}
+                onPointerDown={blockPointer}
+                onPointerMove={blockPointer}
+                className="overflow-x-hidden scroll-smooth no-scrollbar w-[280px] sm:w-[300px] md:w-full mx-auto"
+                style={{ touchAction: 'none', userSelect: 'none' }}
+              >
+                <div className="flex gap-6 md:gap-20 py-2">
+                  {loopedItems.map((t, i) => (
+                    <div
+                      key={i}
+                      data-testimonial-card
+                      className="w-[260px] sm:w-[300px] md:w-[340px] h-[308px] shrink-0 rounded-lg bg-white shadow p-6 flex items-start"
+                    >
+                      <div className="flex-1 space-y-2">
+                        <div className="w-[78px] h-[78px] rounded-full bg-gray-200 overflow-hidden shrink-0">
+                          {t.avatar ? (
+                            <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+                          ) : null}
+                        </div>
+                        <h3 className="text-sm md:text-base font-semibold text-black">{t.name}</h3>
+                        <p className="text-xs text-gray-500">{t.relation}</p>
+                        <p className="mt-2 text-sm text-gray-700 h-20 overflow-hidden text-ellipsis line-clamp-4">
+                          {t.quote}
+                        </p>
+                        <div className="mt-2 flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, s) => {
+                            const rating = t.rating || 0;
+                            const full = Math.floor(rating);
+                            const hasHalf = (rating - full) >= 0.5;
+                            const isFull = s < full;
+                            const isHalf = s === full && hasHalf;
+                            return (
+                              <span key={s} className="relative inline-block w-4 h-4">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 20 20"
+                                  fill={isFull ? '#f59e0b' : '#e5e7eb'}
+                                  className="w-4 h-4"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.803 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.803-2.036a1 1 0 00-1.176 0l-2.803 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.88 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                </svg>
+                                {isHalf ? (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 20 20"
+                                    fill="#f59e0b"
+                                    className="w-4 h-4 absolute top-0 left-0"
+                                    style={{ clipPath: 'inset(0 50% 0 0)' }}
+                                  >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.803 2.036a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.803-2.036a1 1 0 00-1.176 0l-2.803 2.036c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.88 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                ) : null}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Controls */}
+              <div className="mt-6 flex justify-center gap-3">
+                <button
+                  onClick={scrollLeft}
+                  aria-label="Scroll left"
+                  className="bg-[#2E3192] text-white w-8 h-8 rounded hover:bg-black flex items-center justify-center"
+                >
+                  ←
+                </button>
+                <button
+                  onClick={scrollRight}
+                  aria-label="Scroll right"
+                  className="bg-[#2E3192] text-white w-8 h-8 rounded hover:bg-black flex items-center justify-center"
+                >
+                  →
+                </button>
+              </div>
+            </div>
+          </div>
+
+          </div>
+        </section>
+
+      {/* Video Modal Overlay for Stories */}
+      {openStoryId && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={() => setOpenStoryId(null)}
+        >
+          <div className="relative w-full max-w-3xl aspect-video bg-black" onClick={(e) => e.stopPropagation()}>
+            {/* Sakhu logo watermark on video */}
+            <img src={logo} alt="Sakhu Logo" className="absolute top-3 left-3 w-12 h-12 rounded-full ring-2 ring-white/40" />
+            {/* Close button */}
+            <button
+              onClick={() => setOpenStoryId(null)}
+              className="absolute top-3 right-3 px-3 py-2 rounded-md bg-white/10 text-white hover:bg-white/20"
+              aria-label="Close video"
+            >
+              ✕
+            </button>
+            <iframe
+              className="w-full h-full"
+              src={`https://www.youtube.com/embed/${openStoryId}?autoplay=1&rel=0`}
+              title="YouTube video player"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
 
     </main>
   )}

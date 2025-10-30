@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import logo from '../assets/logoNaav.png';
 import Button from './Button.jsx';
 
@@ -44,14 +45,20 @@ export default function Header() {
       >
         <div className="bg-black h-full w-fit min-w-[240px] max-w-[80vw] px-4 py-4 overflow-y-auto">
           <nav className="flex flex-col items-start gap-8 text-sm text-gray-200">
-            <a href="#home" className="px-4 py-2 rounded-md bg-purple-700 text-yellow">Home</a>
-            <a href="#about" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">About Us</a>
-            <a href="#services" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">News & Events</a>
-            <a href="#work" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Volunteer</a>
-            <a href="#news" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Resources</a>
-            <a href="#blog" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Blog</a>
-            <a href="#contact" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Contact</a>
-            <Button href="#donate" className="bg-white text-black">Donate</Button>
+            <Link to="/" className="px-4 py-2 rounded-md bg-purple-700 text-yellow" onClick={() => setOpen(false)}>Home</Link>
+            <Link to="/about" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow" onClick={() => setOpen(false)}>About Us</Link>
+            <a href="/news" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">News & Events</a>
+            <a href="/volunteer" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Volunteer</a>
+            <a href="/resources" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Resources</a>
+            <span
+              aria-disabled="true"
+              title="Coming Soon"
+              className="px-4 py-2 rounded-md text-gray-400 bg-white/5 cursor-not-allowed"
+            >
+              Blog 
+            </span>
+            <a href="/contact" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Contact</a>
+            <Button href="/donation" className="bg-white text-black">Donate</Button>
           </nav>
         </div>
       </div>
@@ -60,14 +67,20 @@ export default function Header() {
       <div className="hidden lg:block bg-black sticky top-14 z-40">
         <div className="max-w-7xl mx-auto px-4 h-12 flex items-center justify-between">
           <nav className="flex justify-center items-center gap-12 text-sm text-gray-200">
-            <a href="#home" className="px-4 py-2 rounded-md bg-purple-700 text-yellow">Home</a>
-            <a href="#about" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">About Us</a>
-            <a href="#services" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">News & Events</a>
-            <a href="#work" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Volunteer</a>
-            <a href="#news" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Resources</a>
-            <a href="#blog" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Blog</a>
-            <a href="#contact" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Contact</a>
-            <Button href="#donate" className="bg-white text-black">Donate</Button>
+            <Link to="/" className="px-4 py-2 rounded-md bg-purple-700 text-yellow">Home</Link>
+            <Link to="/about" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">About Us</Link>
+            <a href="/news" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">News & Events</a>
+            <a href="/volunteer" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Volunteer</a>
+            <a href="/resources" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Resources</a>
+            <span
+              aria-disabled="true"
+              title="Coming Soon"
+              className="px-4 py-2 rounded-md text-gray-400 bg-white/5 cursor-not-allowed"
+            >
+              Blog 
+            </span>
+            <a href="/contact" className="px-4 py-2 rounded-md hover:bg-purple-700 hover:text-yellow">Contact</a>
+            <Button href="/donation" className="bg-white text-black">Donate</Button>
           </nav>
         </div>
       </div>
