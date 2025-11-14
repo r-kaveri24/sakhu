@@ -2,8 +2,6 @@
 
 This repository contains the frontend for the Sakhu Cancer Foundation website built with modern React, Vite, and Tailwind CSS. It showcases clean architecture, component-driven UI, and practical integrations.
 
-Note: This project is prepared for hiring purposes. It highlights skills in React, routing, styling systems, API integrations, and production-ready setup.
-
 **Highlights**
 - React 19 with `react-router-dom` for client-side routing.
 - Vite 7 for a fast dev/build pipeline.
