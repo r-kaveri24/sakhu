@@ -231,8 +231,16 @@ export default function Testimonials({ subtitle = "Family Members Of Patient's",
                           ) : null}
                         </div>
                         <h3 className="text-sm md:text-base font-semibold text-black">{t.name}</h3>
-                        <p className="text-xs text-gray-500">{t.relation}</p>
-                        <p className="mt-2 text-sm text-gray-700 h-20 overflow-hidden text-ellipsis line-clamp-4">
+                        <p className="text-xs text-gray-500">{t.relation || t.role || ''}</p>
+                        <p
+                          className="mt-2 text-sm text-gray-700 overflow-hidden"
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 4,
+                            WebkitBoxOrient: 'vertical',
+                            minHeight: '5rem', // ~80px to reserve space for up to 4 lines
+                          }}
+                        >
                           {t.quote}
                         </p>
                         <div className="mt-2 flex items-center gap-1">

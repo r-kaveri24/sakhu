@@ -8,6 +8,7 @@ import Contact from './pages/Contact.jsx'
 import Volunteer from './pages/Volunteer.jsx'
 import Resources from './pages/Resources.jsx'
 import Gallery from './pages/Gallery.jsx'
+import Videos from './pages/Videos.jsx'
 import News from './pages/News.jsx'
 import NewsDetail from './pages/NewsDetail.jsx'
 
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/volunteer" element={<Volunteer />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/videos" element={<Videos />} />
         <Route path="/news" element={<News />} />
         <Route path="/news/:id" element={<NewsDetail />} />
       </Routes>

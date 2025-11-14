@@ -6,7 +6,9 @@ import supporters1 from '../assets/about/supporters1.png'
 import suppoerters2 from '../assets/about/suppoerters2.png'
 import suppoerters3 from '../assets/about/suppoerters3.png'
 import suppoerters4 from '../assets/about/suppoerters4.png'
-import Testimonials from '../components/Testimonials.jsx'
+import ourteam from '../assets/about/ourteam.png'
+import ImageCarousel from '../components/ImageCarousel.jsx'
+import { API_BASE } from '../lib/adminApi.js'
 import { useEffect, useMemo, useRef, useState } from "react";
 import testimonialBg from "../assets/testimonial-bg.jpg";
 import obj1 from "../assets/obj1.png";
@@ -54,8 +56,18 @@ export default function About() {
       avatar: t.avatar || avatarPool[i % avatarPool.length],
     }));
 
+  // De-duplicate testimonials by name (case-insensitive)
+  const uniqueByName = (arr = []) => {
+    const map = new Map();
+    arr.forEach((t) => {
+      const key = (t.name || "").trim().toLowerCase();
+      if (!map.has(key)) map.set(key, t);
+    });
+    return Array.from(map.values());
+  };
+
   const subtitle = "Family Members Of Patient's";
-  const items = withAvatars([
+  const [items, setItems] = useState(withAvatars([
     { name: 'Harshwardhan Sawant', relation: 'Father of patient', quote: '"आमच्यावर आलेल्या संकटाच्या काळात सखू कॅन्सर फाउंडेशनकडून मिळालेला आधार खूप मोठा होता. त्यांच्यामदतीने आम्हाला खंबीरपणे पुढे जाण्याची ताकद मिळाली.फाउंडेशनचे आभार व्यक्त करण्यासाठी शब्द अपुरे आहेत."', rating: 5, avatar: null },
     { name: 'Arhan Shaikh', relation: 'Family Member', quote: '"आमचा मुलगा हर्षवर्धन कॅन्सरशी लढतोय. उपचाराचा खर्च मोठा होता, पण डॉ. मंगला विधाटे यांच्याकडून मिळालेल्या मदतीने आम्हाला खूप आधार मिळाला. आम्ही मनापासूनआभारी आहोत."', rating: 4, avatar: null },
     { name: 'Bhushan Raut', relation: 'Patient Relative', quote: '"आमचा मुलगा अरहान गंभीर आजाराशी संघर्ष करतोय, आणि उपचाराचा खर्च आमच्यासाठी खूप मोठा होता. सखूकॅन्सर फाउंडेशनच्या मदतीमुळे आम्हाला आधार मिळाला.आम्ही मनापासून आभारी आहोत."', rating: 5, avatar: null },
@@ -63,7 +75,34 @@ export default function About() {
     { name: 'Ramesh Deshmukh', relation: 'Guardian', quote: '"माझ्या वडिलांच्या उपचारासाठी आम्ही अनेक ठिकाणी मदत मागितली,पण खरी मदत सखू कॅन्सर फाउंडेशनकडूनच मिळाली.त्यांच्या सहकार्यामुळे आमच्या घरात पुन्हा आशेचा किरण आला आहे."', rating: 4, avatar: null },
     { name: 'Sana Khan', relation: 'Mother', quote: '"आमच्या लहान मुलीच्या उपचाराचा खर्च खूप मोठा होता, आणि आम्ही हतबल झालो होतो.सखू कॅन्सर फाउंडेशनने योग्य वेळी मदत करून आम्हाला दिलासा दिला.त्यांच्या या माणुसकीच्या भावनेमुळे आम्ही पुन्हा हसणं शिकलो."', rating: 4, avatar: null },
     { name: 'Vikas Jadhav', relation: 'Uncle', quote: '"माझ्या आईच्या कॅन्सरच्या उपचारासाठी आम्ही खूप प्रयत्न करत होतो,पण खर्च परवडत नव्हता. सखू कॅन्सर फाउंडेशनने पुढाकार घेतमदत केली आणि आम्हाला आशेचा नवा किरण दिला.त्यांच्या मदतीमुळे आईचं उपचार सुरू राहू शकले — आम्ही मनापासून आभारी आहोत."', rating: 4.5, avatar: null },
-  ]);
+  ]));
+
+  // Load testimonials from admin API, fallback to local items
+  useEffect(() => {
+    let ignore = false;
+    async function load() {
+      try {
+        const res = await fetch(`${API_BASE}/api/testimonials`, { mode: 'cors' });
+        if (!res.ok) throw new Error('Failed to load testimonials');
+        const data = await res.json();
+        const apiItems = (data.items || []).map((t) => ({
+          name: t.name,
+          relation: t.role || '',
+          quote: t.quote,
+          avatar: t.avatar || null,
+          rating: 5,
+        }));
+        if (!ignore) {
+          // Merge API items with existing local items and de-duplicate
+          setItems((prev) => uniqueByName(withAvatars([...apiItems, ...prev])));
+        }
+      } catch (e) {
+        // keep local fallback
+      }
+    }
+    load();
+    return () => { ignore = true; };
+  }, []);
 
   // Missing refs/state for scrolling controls
   const listRef = useRef(null);
@@ -83,21 +122,8 @@ export default function About() {
 
 
 
-  // Block wheel scrolling to enforce button-only manual scroll inside testimonials
-  const blockWheel = (e) => {
-    e.preventDefault();
-  };
-
-  // Block touch gestures (swipes/pans) to enforce button-only manual scroll
-  const blockTouch = (e) => {
-    e.preventDefault();
-  };
-
-  // Block pointer-based panning (e.g., touch/pen) while keeping mouse clicks
-  const blockPointer = (e) => {
-    // Prevent drag/pan for all pointer types (mouse, touch, pen)
-    e.preventDefault();
-  };
+  // Allow native vertical scrolling; buttons handle horizontal movement
+  // Removed touch/wheel/pointer blocking to restore page scroll on mobile
 
   const handleInfiniteScroll = () => {
     const el = listRef.current;
@@ -177,6 +203,82 @@ export default function About() {
 
   
   const supportersLogos = [supporters1, suppoerters2, suppoerters3, suppoerters4]
+  
+  // Demo image sets for carousels (replace with real team/volunteer photos as available)
+  const teamImages = [
+    { src: obj1, name: 'Team Member 1', role: 'Coordinator' },
+    { src: obj2, name: 'Team Member 2', role: 'Support Lead' },
+    { src: obj3, name: 'Team Member 3', role: 'Outreach' },
+    { src: obj4, name: 'Team Member 4', role: 'Operations' },
+  ];
+  const volunteerImages = [
+    { src: hope1, name: 'Volunteer 1' },
+    { src: hope2, name: 'Volunteer 2' },
+    { src: hope3, name: 'Volunteer 3' },
+    { src: hope4, name: 'Volunteer 4' },
+  ];
+  
+  // Live API-backed data (default to local fallbacks)
+  const [teamImagesLive, setTeamImagesLive] = useState(teamImages);
+  const [volunteerImagesLive, setVolunteerImagesLive] = useState(volunteerImages);
+
+  // Load Team members from admin API (connected to DB & AWS S3)
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchTeam() {
+      if (!API_BASE) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/team`, { mode: 'cors' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const mapped = items
+          .map((it) => ({
+            src: it?.avatarUrl || '',
+            name: it?.name || '',
+            role: it?.designation || undefined,
+          }))
+          .filter((m) => m.src && m.name);
+        if (!cancelled && mapped.length) setTeamImagesLive(mapped);
+      } catch (_) {
+        // Keep fallbacks on error
+      }
+    }
+    fetchTeam();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Load Volunteer members from admin API
+  useEffect(() => {
+    let cancelled = false;
+    async function fetchVolunteer() {
+      if (!API_BASE) return;
+      try {
+        const res = await fetch(`${API_BASE}/api/volunteer`, { mode: 'cors' });
+        if (!res.ok) return;
+        const data = await res.json();
+        const items = Array.isArray(data?.items) ? data.items : [];
+        const mapped = items
+          .map((it) => ({
+            src: it?.avatarUrl || '',
+            name: it?.name || '',
+          }))
+          .filter((m) => m.src && m.name);
+        if (!cancelled && mapped.length) setVolunteerImagesLive(mapped);
+      } catch (_) {
+        // Keep fallbacks on error
+      }
+    }
+    fetchVolunteer();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  
+  // Our Team background: use provided image via public path, fallback to testimonialBg
+  const [teamBgSrc, setTeamBgSrc] = useState(ourteam);
   return (
     <main className="bg-white">
       {/* Hero banner with placeholder image (will be replaced later) */}
@@ -269,10 +371,6 @@ export default function About() {
       <section className="py-10">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-thin text-center">Our <span className="font-bold">Mission</span></h2>
-          <p className="mt-2 text-sm text-start">
-            "Is To Promote the Health and Quality of Life of Cancer Patients by Giving Financial, Psychological, Emotional, Social & Rehabilitation Assistance to the Low-Income and Needy patients of Society"
-          </p>
-
           <div className="mt-6">
             <h3 className="text-sm md:text-lg font-semibold">We are committed to:</h3>
             <ul className="mt-3 space-y-2 text-sm text-gray-700 list-disc pl-5">
@@ -290,41 +388,80 @@ export default function About() {
         </div>
       </section>
 
-      {/* Our Team (card grid) */}
-      <section className="py-10">
-        <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-xl font-semibold">Our Team</h3>
-          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[1,2,3,4].map((i) => (
-              <div key={i} className="rounded-md border border-gray-200 bg-white shadow p-3">
-                <div className="w-full h-32 bg-gray-200 rounded" />
-                <p className="mt-2 text-sm font-medium">Member {i}</p>
-                <p className="text-xs text-gray-600">Role / Title</p>
-              </div>
-            ))}
+      {/* Our Team and Our Volunteer stacked in one column, matching reference spacing */}
+      <section className="py-12 w-full ">
+        <div className="w-full mx-auto px-4 relative z-10 flex flex-col items-center">
+          <div className="absolute inset-0 z-0 w-full h-full">
+              <img
+                src={teamBgSrc}
+                onError={() => setTeamBgSrc(testimonialBg)}
+                alt="Our Team background"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-white/40" aria-hidden="true" />
+            </div>
+          {/* Our Team on top */}
+          <h2 className=" relative text-2xl md:text-3xl font-thin text-center">
+            Our <span className="font-bold">Team</span>
+          </h2>
+          <p className=" relative mt-2 text-sm md:text-base text-gray-700 text-center">Meet our core team</p>
+          {/* Team carousel over background image */}
+          <div className="relative  mt-6 rounded-lg overflow-hidden">
+            {/* Background */}
+            
+            {/* Foreground content */}
+            <div className="relative px-2 md:px-4 py-6 max-w-5xl">
+              <ImageCarousel title={null} images={teamImagesLive} />
+            </div>
+          </div>
+
+          {/* Our Volunteer below, visually distinct via subtitle and spacing */}
+          <h2 className="relative  text-2xl md:text-3xl font-thin text-center">
+            Our <span className="font-bold">Volunteer</span>
+          </h2>
+          <p className=" relative  mt-2 text-sm md:text-base text-gray-700 text-center">Community members who support our mission</p>
+           <div className="relative  mt-6 rounded-lg overflow-hidden">
+          <div className="relative px-2 md:px-4 py-6 max-w-5xl">
+            <ImageCarousel title={null} images={volunteerImagesLive}  roleFallback="Volunteer" />
+          </div>
           </div>
         </div>
       </section>
 
-      {/* Our Supporters - auto-scrolling marquee (after Our Team) */}
+      {/* Our Supporters - seamless continuous marquee */}
       <section className="py-10">
         <div className="max-w-[1200px] mx-auto px-4">
           <h2 className="text-2xl md:text-3xl font-thin text-center mb-10">Our <span className="font-bold">Supporters</span></h2>
           <div className="mt-6 relative overflow-hidden">
-            <div className="flex items-center gap-12 whitespace-nowrap animate-marquee">
-              {[...supportersLogos, ...supportersLogos, ...supportersLogos, ...supportersLogos].map((src, i) => (
-                <img key={`logo-${i}`} src={src} alt={`Supporter ${(i%supportersLogos.length)+1}`} className="h-12 md:h-16 object-contain" />
-              ))}
+            {/* Two equal inner groups, each long enough to cover wide screens */}
+            <div className="marquee-track flex items-center whitespace-nowrap" style={{ willChange: 'transform' }}>
+              <div className="marquee-inner flex items-center gap-12">
+                {[...supportersLogos, ...supportersLogos, ...supportersLogos].map((src, i) => (
+                  <img key={`logo-a-${i}`} src={src} alt={`Supporter ${(i%supportersLogos.length)+1}`} className="h-12 md:h-16 object-contain" />
+                ))}
+              </div>
+              <div className="marquee-inner flex items-center gap-12" aria-hidden="true">
+                {[...supportersLogos, ...supportersLogos, ...supportersLogos].map((src, i) => (
+                  <img key={`logo-b-${i}`} src={src} alt="" className="h-12 md:h-16 object-contain" />
+                ))}
+              </div>
             </div>
           </div>
         </div>
         <style>{`
           @keyframes marquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-25%); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-50%, 0, 0); }
           }
-          .animate-marquee {
-            animation: marquee 25s linear infinite;
+          .marquee-track { 
+            animation: marquee 20s linear infinite;
+            backface-visibility: hidden;
+            transform: translateZ(0);
+          }
+          .marquee-inner { flex: 0 0 auto; }
+          .marquee-inner + .marquee-inner { margin-left: 3rem; }
+          @media (prefers-reduced-motion: reduce) {
+            .marquee-track { animation: none; }
           }
         `}</style>
       </section>
@@ -380,14 +517,9 @@ export default function About() {
             <div>
               <div
                 ref={listRef}
-                onWheel={blockWheel}
                 onScroll={handleInfiniteScroll}
-                onTouchStart={blockTouch}
-                onTouchMove={blockTouch}
-                onPointerDown={blockPointer}
-                onPointerMove={blockPointer}
                 className="overflow-x-hidden scroll-smooth no-scrollbar w-[280px] sm:w-[300px] md:w-full mx-auto"
-                style={{ touchAction: 'none', userSelect: 'none' }}
+                style={{ touchAction: 'pan-y', userSelect: 'auto' }}
               >
                 <div className="flex gap-6 md:gap-20 py-2">
                   {loopedItems.map((t, i) => (

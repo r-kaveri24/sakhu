@@ -2,7 +2,7 @@ import heroImg from '../assets/about/hero.png'
 
 export default function HeroBanner({ title = 'Welcome' , image = heroImg }) {
   return (
-    <section className="relative">
+    <section className="relative h-100">
       <img src={image} alt={title} className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-black/25" />
       <div className="absolute inset-0 flex items-center justify-center">

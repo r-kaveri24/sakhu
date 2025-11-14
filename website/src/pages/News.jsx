@@ -1,8 +1,24 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import HeroBanner from '../components/HeroBanner.jsx'
-import { newsItems } from '../data/news.js'
+import { newsItems as fallbackNews } from '../data/news.js'
+import { getNews } from '../lib/adminApi.js'
 
 export default function News() {
+  const [items, setItems] = useState(fallbackNews)
+
+  useEffect(() => {
+    (async () => {
+      const list = await getNews()
+      if (Array.isArray(list) && list.length) {
+        setItems(list)
+      }
+    })()
+  }, [])
+
+  const getCardImage = (n) => n.heroImage || n.images?.[0] || n.image
+  const getCardSummary = (n) => n.summary || n?.sections?.[0]?.paragraphs?.[0] || ''
+
   return (
     <main>
       <HeroBanner title="News & Events" />
@@ -10,7 +26,7 @@ export default function News() {
       {/* Overview */}
       <section className="max-w-7xl mx-auto px-4 py-10">
         <h2 className="text-2xl md:text-3xl font-bold">Overview</h2>
-        <p className="mt-3 text-sm text-gray-700 max-w-4xl">
+        <p className="mt-3 text-sm text-gray-700 ">
           Welcome to the News and Events page, where you’ll find the latest updates from <span className='font-semibold'>Sakhu Cancer Foundation,</span>  including important announcements, upcoming events, and milestones in our mission to support cancer patients through financial aid. Scroll through or search for past updates to stay informed about our work and impact.
         </p>
 
@@ -22,20 +38,20 @@ export default function News() {
           </p>
 
           <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-20">
-            {newsItems.map((n) => (
+            {items.map((n) => (
               <Link
                 key={n.id}
                 to={`/news/${n.id}`}
                 className="block rounded-lg bg-purple-600 border-l-4 border-purple-600 shadow hover:shadow-md p-4 group"
               >
-                {(n.images?.[0] || n.image) && (
-                  <img src={n.images?.[0] || n.image} alt={n.title} className="w-full h-32 object-cover rounded-t-lg" />
+                {getCardImage(n) && (
+                  <img src={getCardImage(n)} alt={n.title} className="w-full h-32 object-cover rounded-t-lg" />
                 )}
                 <div className="p-4">
                   <h4 className="text-sm md:text-base font-semibold">{n.title}</h4>
-                  <p className="mt-1 text-[11px] text-gray-600">Date: {n.date}</p>
+                  {n.date && <p className="mt-1 text-[11px] text-gray-600">Date: {n.date}</p>}
                   <p className="mt-3 text-sm text-white h-[80px] overflow-hidden text-ellipsis line-clamp-3 md:line-clamp-6">
-                    {n.summary}
+                    {getCardSummary(n)}
                   </p>
                   <span className="mt-3 inline-block text-xs text-purple-700 underline group-hover:text-purple-500">Read more</span>
                 </div>

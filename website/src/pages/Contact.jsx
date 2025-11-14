@@ -4,6 +4,7 @@ import mobileIcon from '../assets/contact/mobile.png'
 import emailIcon from '../assets/contact/email.png'
 import linkIcon from '../assets/contact/link.png'
 import HeroBanner from '../components/HeroBanner.jsx'
+import { API_BASE } from '../lib/adminApi.js'
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -28,10 +29,27 @@ export default function Contact() {
     setForm((f) => ({ ...f, [name]: value }))
   }
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
-    alert('Thanks! Your message has been submitted.')
-    setForm({ name: '', email: '', mobile: '', address: '', note: '' })
+    try {
+      const res = await fetch(`${API_BASE}/api/forms/public/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify(form),
+      })
+      if (!res.ok) throw new Error('Failed to submit contact form')
+      const data = await res.json()
+      alert('Thanks! Your message has been submitted.')
+      setForm({ name: '', email: '', mobile: '', address: '', note: '' })
+      console.log('Contact submission:', data)
+    } catch (err) {
+      console.error(err)
+      alert('Sorry, submission failed. Please try again later.')
+    }
   }
 
   const InfoRow = ({ icon, title, children }) => (

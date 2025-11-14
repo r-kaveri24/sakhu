@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import HeroBanner from '../components/HeroBanner.jsx'
 import ongoing1 from '../assets/resources/ongoing1.png'
 import ongoing2 from '../assets/resources/ongoing2.png'
 import ongoing3 from '../assets/resources/ongoing3.png'
 import ongoing4 from '../assets/resources/ongoing4.png'
 import logo from '../assets/logoNaav.png'
+import { getGalleryPhotos } from '../lib/adminApi.js'
+import { getYouTubeUploadsFromEnv, makeYouTubeThumb } from '../lib/youtube.js'
 
 export default function Resources() {
   const projects = [
@@ -31,10 +33,16 @@ export default function Resources() {
     },
   ]
 
-  const galleryImages = Object.values(
-    import.meta.glob('../assets/resources/*.{png,jpg,jpeg,webp}', { eager: true, as: 'url' })
-  )
-  // Provided YouTube links; extract their IDs for thumbnails and embedding
+  const [photos, setPhotos] = useState([])
+  useEffect(() => {
+    (async () => {
+      const items = await getGalleryPhotos()
+      setPhotos(items)
+    })()
+  }, [])
+  // Video gallery: fetch YouTube channel uploads
+  const [videos, setVideos] = useState([])
+  // Fallback links in case YouTube API key/channel is not set.
   const videoLinks = [
     'https://youtu.be/BQWVOShOsis?si=HkqSeXF72D9uSU5m',
     'https://youtu.be/AexAwM_TI9M?si=btJDesrlWrHO0Ope',
@@ -162,9 +170,9 @@ export default function Resources() {
           <span className="font-thin">Photo</span> <span className="font-bold">Gallery</span>
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-6">
-          {galleryImages.map((src, idx) => (
-            <div key={idx} className="rounded-md overflow-hidden border border-gray-300 bg-white">
-              <img src={src} alt={`Gallery ${idx + 1}`} className="w-full h-40 object-cover" loading="lazy" />
+          {photos.slice(0,4).map((p, idx) => (
+            <div key={p.id || idx} className="rounded-md overflow-hidden border border-gray-300 bg-white">
+              <img src={p.url} alt={p.caption || `Gallery ${idx + 1}`} className="w-full h-40 object-cover" loading="lazy" />
             </div>
           ))}
         </div>

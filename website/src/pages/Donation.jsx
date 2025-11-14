@@ -6,6 +6,7 @@ import paypalIcon from '../assets/donation/payment1.png';
 import visaIcon from '../assets/donation/payment2.png';
 import debitIcon from '../assets/donation/payment3.png';
 import HeroBanner from '../components/HeroBanner';
+import { API_BASE } from '../lib/adminApi.js';
 
 export default function Donation() {
   const [donationType, setDonationType] = useState('one_time');
@@ -39,30 +40,41 @@ export default function Donation() {
     return amountChoice || otherAmount;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const amt = finalAmount();
     if (!amt) {
       setAmountError('Please select or enter an amount.');
       return;
     }
-    // Basic payload (for future integration)
+
+    // Submit only safe fields to the admin public donation endpoint
     const payload = {
-      donationType,
       amount: Number(amt),
       name,
       email,
       mobile,
       state,
       address,
-      paymentOption,
-      holderName,
-      cardNumber,
-      expiry,
-      cvc,
     };
-    console.log('Donation form submitted:', payload);
-    setConfirmed(true);
+
+    try {
+      const res = await fetch(`${API_BASE}/api/forms/public/donation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        mode: 'cors',
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error('Failed to submit donation');
+      const data = await res.json();
+      console.log('Donation submitted:', data);
+      setConfirmed(true);
+      // Reset form values after success
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      alert('Sorry, donation submission failed. Please try again later.');
+    }
   }
 
   function resetForm() {
@@ -98,7 +110,7 @@ export default function Donation() {
               <p className="text-xs opacity-90">City : Chhatrapati Sambhajinagar Maharashtra, India.</p>
             </div>
             <div className="flex items-center justify-center">
-              <div className="w-32 h-32 md:w-36 md:h-36 bg-white rounded-md flex items-center justify-center text-black">
+              <div className="w-32 h-32 md:w-66 md:h-66 bg-white rounded-md flex items-center justify-center text-black">
                 <span className="text-xs">QR Placeholder</span>
               </div>
             </div>

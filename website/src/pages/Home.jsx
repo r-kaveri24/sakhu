@@ -27,11 +27,14 @@ import sakhu from '../assets/about-sakhu.png'
 import logo from '../assets/logoNaav.png'
 
 import { useEffect, useState, useRef, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { API_BASE, getHero, getNews } from '../lib/adminApi.js';
+import heroImg from '../assets/about/hero.png';
 import testimonialBg from '../assets/testimonial-bg.jpg';
 import Testimonials from '../components/Testimonials.jsx';
 
 export default function Home() {
-  const slides = [null, null, null];
+  const [slides, setSlides] = useState([heroImg]);
   const [current, setCurrent] = useState(0);
   const [news, setNews] = useState({ title: 'Latest News', items: [] });
   const [testimonials, setTestimonials] = useState({ title: 'Testimonials', subtitle: "Family Members Of Patient's", items: [] });
@@ -75,11 +78,29 @@ export default function Home() {
   const prevStory = () => setStoryIndex((i) => (i - 1 + storyIds.length) % storyIds.length);
   const nextStory = () => setStoryIndex((i) => (i + 1) % storyIds.length);
 
+  // Auto-advance slideshow if multiple images
   useEffect(() => {
+    if ((slides?.length || 0) < 2) return;
     const id = setInterval(() => {
       setCurrent((i) => (i + 1) % slides.length);
     }, 5000);
     return () => clearInterval(id);
+  }, [slides.length]);
+
+  // Load hero images from Admin API (Home-only)
+  useEffect(() => {
+    (async () => {
+      try {
+        const items = await getHero();
+        const urls = Array.isArray(items) ? items
+          .filter((i) => !i.alt || i.alt === 'desktop')
+          .slice(0, 4)
+          .map((i) => i.url) : [];
+        if (urls.length) setSlides(urls);
+      } catch {
+        // keep fallback
+      }
+    })();
   }, []);
 
   // Load Latest News dynamically from API, fallback to local content
@@ -105,12 +126,22 @@ export default function Home() {
 
     async function loadNews() {
       try {
-        const res = await fetch('/api/news');
-        if (res.ok) {
-          const data = await res.json();
-          setNews(data);
-        } else {
+        const list = await getNews();
+        const items = (Array.isArray(list) ? list : [])
+          .map((n) => ({
+            heading: n.title || n.slug || 'Untitled',
+            body: n.summary || n?.sections?.[0]?.paragraphs?.[0] || (typeof n.content === 'string' ? n.content : ''),
+            image: n.heroImage || n.images?.[0] || n.image || null,
+            id: n.id,
+            publishedAt: n.publishedAt || n.createdAt || n.date,
+          }))
+          .sort((a, b) => new Date(b.publishedAt || 0) - new Date(a.publishedAt || 0))
+          .slice(0, 2);
+
+        if (!items.length) {
           setNews(fallback);
+        } else {
+          setNews({ title: 'Latest News', items });
         }
       } catch (e) {
         setNews(fallback);
@@ -150,11 +181,19 @@ export default function Home() {
 
     async function loadTestimonials() {
       try {
-        const res = await fetch('/api/testimonials');
+        if (!API_BASE) throw new Error('No API base')
+        const res = await fetch(`${API_BASE}/api/testimonials`, { mode: 'cors' });
         if (res.ok) {
           const data = await res.json();
-          const items = withAvatars(data.items || []);
-          setTestimonials({ ...data, items });
+          const items = (data.items || []).map((t, i) => ({
+            name: t.name,
+            relation: t.role || '',
+            quote: t.quote,
+            avatar: t.avatar || null,
+            rating: 5,
+          }));
+          const withAv = withAvatars(items);
+          setTestimonials({ title: 'Testimonials', subtitle: "Family Members Of Patient's", items: withAv });
         } else {
           setTestimonials({ ...fallback, items: withAvatars(fallback.items) });
         }
@@ -617,21 +656,24 @@ export default function Home() {
           <div>
             <h2 className="text-2xl md:text-3xl font-thin">Latest <span className="font-bold">News</span></h2>
             <div className="mt-6 space-y-8">
-              {(news.items || []).slice(0,2).map((n, i) => (
+              {(news.items || []).map((n, i) => (
                 <article key={i}>
                   <h3 className="font-semibold text-lg text-black">{n.heading}</h3>
                   <p className="mt-2 text-sm leading-6 text-gray-700">{n.body}</p>
                 </article>
               ))}
+              {(!news.items || news.items.length === 0) && (
+                <p className="text-sm text-gray-600">No news yet. Check back soon.</p>
+              )}
             </div>
             <div className="mt-6">
-              <button className="bg-purple-600 px-4 py-2 text-white rounded-md hover:bg-black">All Events</button>
+              <Link to="/news" className="bg-purple-600 px-4 py-2 text-white rounded-md hover:bg-black">All Events</Link>
             </div>
           </div>
 
           {/* Right: stacked photos */}
           <div className="space-y-6">
-            {(news.items || []).slice(0,2).map((n, i) => (
+            {(news.items || []).map((n, i) => (
               <img
                 key={i}
                 src={n?.image || (i === 0 ? eligibility1 : eligibility2)}

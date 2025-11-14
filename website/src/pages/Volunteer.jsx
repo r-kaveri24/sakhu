@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { API_BASE } from '../lib/adminApi.js'
 import HeroBanner from '../components/HeroBanner.jsx'
 import v1 from '../assets/volunteer/1.png'
 import v2 from '../assets/volunteer/2.png'
@@ -50,9 +51,45 @@ export default function Volunteer() {
     }))
   }
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault()
-    alert('Thank you! Your volunteer form has been submitted.')
+    try {
+      if (!API_BASE) {
+        alert('Admin API not configured. Please set VITE_ADMIN_API_BASE.')
+        return
+      }
+      const payload = {
+        name: form.name,
+        email: form.email,
+        mobile: form.mobile,
+        address: form.address,
+        occupation: form.occupation,
+        areasOfWork: form.workAreas.join(', '),
+        availability: form.availability,
+        fromTime: `${form.fromTime} ${form.fromPeriod}`.trim(),
+        toTime: `${form.toTime} ${form.toPeriod}`.trim(),
+        hoursPerDay: Number(form.hoursPerDay) || null,
+        preferredCity: form.city,
+      }
+      const res = await fetch(`${API_BASE}/api/forms/public/volunteer`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        mode: 'cors',
+      })
+      if (!res.ok) throw new Error(await res.text())
+      await res.json()
+      alert('Thank you! Your volunteer form has been submitted.')
+      setForm({
+        name: '', email: '', mobile: '', address: '', occupation: '',
+        workAreas: [], availability: 'daily', days: [],
+        fromTime: '', fromPeriod: 'AM', toTime: '', toPeriod: 'AM',
+        hoursPerDay: '', city: 'Sambhajinagar'
+      })
+    } catch (err) {
+      console.error(err)
+      alert('Submission failed. Please try again later.')
+    }
   }
 
   return (

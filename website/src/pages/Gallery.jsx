@@ -1,9 +1,15 @@
+import { useEffect, useState } from 'react'
 import HeroBanner from '../components/HeroBanner.jsx'
+import { getGalleryPhotos } from '../lib/adminApi.js'
 
 export default function Gallery() {
-  const images = Object.values(
-    import.meta.glob('../assets/resources/*.{png,jpg,jpeg,webp}', { eager: true, as: 'url' })
-  )
+  const [photos, setPhotos] = useState([])
+  useEffect(() => {
+    (async () => {
+      const items = await getGalleryPhotos()
+      setPhotos(items)
+    })()
+  }, [])
 
   return (
     <main>
@@ -14,9 +20,9 @@ export default function Gallery() {
         <p className="text-sm text-gray-700 mt-2">Browse our gallery of ongoing work and events.</p>
 
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((src, idx) => (
-            <div key={idx} className="rounded-md overflow-hidden border border-gray-300 bg-white">
-              <img src={src} alt={`Photo ${idx + 1}`} className="w-full h-48 object-cover" loading="lazy" />
+          {photos.map((p, idx) => (
+            <div key={p.id || idx} className="rounded-md overflow-hidden border border-gray-300 bg-white">
+              <img src={p.url} alt={p.caption || `Photo ${idx + 1}`} className="w-full h-48 object-cover" loading="lazy" />
             </div>
           ))}
         </div>
